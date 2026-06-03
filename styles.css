@@ -30,7 +30,7 @@ body {
   line-height: 1.4;
   background: var(--bg);
   color: var(--text);
-  padding: calc(12px + var(--safe-top)) 16px calc(100px + var(--safe-bottom));
+  padding: calc(12px + var(--safe-top)) 16px calc(80px + var(--safe-bottom));
 }
 
 .header {

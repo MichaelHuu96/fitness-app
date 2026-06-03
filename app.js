@@ -1,13 +1,4 @@
 const STORAGE_KEY = "workout-weights-v1";
-const META_KEY = "workout-meta-v1";
-const TOKEN_KEY = "github-pat";
-
-const github = window.SYNC_CONFIG?.github ?? {
-  owner: "MichaelHuu96",
-  repo: "fitness-app",
-  branch: "main",
-  path: "data/weights.json",
-};
 
 const plan = [
   {
@@ -50,9 +41,6 @@ const plan = [
 
 let activeDay = 0;
 let weights = loadWeights();
-let meta = loadMeta();
-let pushTimer = null;
-let fileSha = null;
 
 function loadWeights() {
   try {
@@ -63,139 +51,8 @@ function loadWeights() {
   }
 }
 
-function loadMeta() {
-  try {
-    const raw = localStorage.getItem(META_KEY);
-    return raw ? JSON.parse(raw) : { updatedAt: null };
-  } catch {
-    return { updatedAt: null };
-  }
-}
-
-function saveWeightsLocal() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(weights));
-  meta.updatedAt = new Date().toISOString();
-  localStorage.setItem(META_KEY, JSON.stringify(meta));
-}
-
-function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
-}
-
-function setToken(value) {
-  const trimmed = value.trim();
-  if (trimmed) localStorage.setItem(TOKEN_KEY, trimmed);
-  else localStorage.removeItem(TOKEN_KEY);
-}
-
-function rawUrl() {
-  return `https://raw.githubusercontent.com/${github.owner}/${github.repo}/${github.branch}/${github.path}`;
-}
-
-function apiUrl() {
-  return `https://api.github.com/repos/${github.owner}/${github.repo}/contents/${github.path}`;
-}
-
-function githubHeaders() {
-  return {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${getToken()}`,
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-}
-
-function applyRemote(data) {
-  const remote = data?.weights;
-  const remoteAt = data?.updatedAt;
-  if (!remote || typeof remote !== "object") return false;
-
-  const localAt = meta.updatedAt ? Date.parse(meta.updatedAt) : 0;
-  const remoteTime = remoteAt ? Date.parse(remoteAt) : 0;
-
-  if (remoteTime >= localAt) {
-    weights = { ...remote };
-    meta.updatedAt = remoteAt;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(weights));
-    localStorage.setItem(META_KEY, JSON.stringify(meta));
-    return true;
-  }
-  return false;
-}
-
-async function pullFromGithub() {
-  setSyncMessage("Loading…");
-  try {
-    const res = await fetch(`${rawUrl()}?t=${Date.now()}`);
-    if (res.status === 404) {
-      updateSyncStatus();
-      return;
-    }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const changed = applyRemote(data);
-    if (changed) renderDay(activeDay);
-    updateSyncStatus();
-  } catch (err) {
-    setSyncMessage("Could not load — check connection");
-    console.error(err);
-    updateSyncStatus();
-  }
-}
-
-async function pushToGithub() {
-  const token = getToken();
-  if (!token) {
-    updateSyncStatus();
-    return;
-  }
-
-  setSyncMessage("Saving…");
-  try {
-    const getRes = await fetch(apiUrl(), { headers: githubHeaders() });
-    if (getRes.ok) {
-      const file = await getRes.json();
-      fileSha = file.sha;
-    } else if (getRes.status !== 404) {
-      throw new Error(`GET ${getRes.status}`);
-    }
-
-    const payload = {
-      weights,
-      updatedAt: meta.updatedAt || new Date().toISOString(),
-    };
-    const body = {
-      message: "Update workout weights",
-      content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
-      branch: github.branch,
-    };
-    if (fileSha) body.sha = fileSha;
-
-    const putRes = await fetch(apiUrl(), {
-      method: "PUT",
-      headers: { ...githubHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    if (!putRes.ok) throw new Error(`PUT ${putRes.status}`);
-    const result = await putRes.json();
-    fileSha = result.content?.sha ?? fileSha;
-    setSyncMessage("");
-    updateSyncStatus();
-  } catch (err) {
-    setSyncMessage("Save failed — check token has write access");
-    console.error(err);
-    updateSyncStatus();
-  }
-}
-
-function schedulePush() {
-  clearTimeout(pushTimer);
-  pushTimer = setTimeout(pushToGithub, 1200);
-}
-
 function saveWeights() {
-  saveWeightsLocal();
-  schedulePush();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(weights));
 }
 
 function weightKey(dayId, exerciseId) {
@@ -270,46 +127,6 @@ function setActiveTab(dayIndex) {
   renderDay(dayIndex);
 }
 
-function setSyncMessage(msg) {
-  const el = document.getElementById("sync-message");
-  if (el) el.textContent = msg;
-}
-
-function updateSyncStatus() {
-  const el = document.getElementById("sync-status");
-  if (!el) return;
-  if (getToken()) {
-    el.textContent = "Auto-sync on · same weights on all devices";
-  } else {
-    el.textContent = "Read-only sync · add token to save edits";
-  }
-}
-
-function initSyncUI() {
-  const toggle = document.getElementById("sync-toggle");
-  const body = document.getElementById("sync-body");
-  const tokenInput = document.getElementById("github-token");
-
-  if (getToken()) tokenInput.placeholder = "Token saved (enter new to replace)";
-
-  toggle.addEventListener("click", () => {
-    const open = body.hidden;
-    body.hidden = !open;
-    toggle.setAttribute("aria-expanded", String(open));
-  });
-
-  document.getElementById("save-token").addEventListener("click", () => {
-    setToken(tokenInput.value);
-    tokenInput.value = "";
-    tokenInput.placeholder = "Token saved (enter new to replace)";
-    setSyncMessage("Token saved — edits will sync automatically");
-    updateSyncStatus();
-    pushToGithub();
-  });
-
-  document.getElementById("pull-now").addEventListener("click", pullFromGithub);
-}
-
 document.querySelectorAll(".day-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     setActiveTab(Number(tab.dataset.day));
@@ -317,17 +134,10 @@ document.querySelectorAll(".day-tab").forEach((tab) => {
 });
 
 document.getElementById("clear-weights").addEventListener("click", () => {
-  if (!confirm("Clear all weights everywhere? This syncs to GitHub.")) return;
+  if (!confirm("Clear all weights on this device?")) return;
   weights = {};
   saveWeights();
   renderDay(activeDay);
 });
 
-initSyncUI();
 setActiveTab(0);
-
-pullFromGithub().then(() => {
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") pullFromGithub();
-  });
-});

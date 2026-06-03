@@ -13,38 +13,8 @@
 <body>
   <header class="header">
     <h1>Workout Tracker</h1>
-    <p class="subtitle" id="sync-status">Loading…</p>
+    <p class="subtitle">3-day split · weights saved on this device</p>
   </header>
-
-  <section class="sync-panel" aria-label="Sync settings">
-    <button type="button" class="sync-toggle" id="sync-toggle" aria-expanded="false">
-      Sync setup (one time)
-      <span class="sync-chevron" aria-hidden="true">▼</span>
-    </button>
-    <div class="sync-body" id="sync-body" hidden>
-      <p class="sync-hint">
-        Paste a GitHub token once on each phone. Weights auto-save to your repo and load on every device — no export/import.
-      </p>
-      <label class="sync-label" for="github-token">GitHub token</label>
-      <input
-        type="password"
-        id="github-token"
-        class="sync-code-input"
-        placeholder="ghp_… or github_pat_…"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <p class="sync-hint">
-        <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">Create a fine-grained token</a>
-        → this repo only → Contents: Read and write.
-      </p>
-      <p class="sync-message" id="sync-message" role="status"></p>
-      <div class="sync-actions">
-        <button type="button" id="save-token" class="btn-secondary">Save token</button>
-        <button type="button" id="pull-now" class="btn-secondary">Refresh now</button>
-      </div>
-    </div>
-  </section>
 
   <nav class="day-tabs" role="tablist" aria-label="Workout days">
     <button type="button" class="day-tab active" data-day="0" role="tab" aria-selected="true">Push</button>
@@ -58,7 +28,6 @@
     <button type="button" id="clear-weights" class="btn-secondary">Clear all weights</button>
   </footer>
 
-  <script src="sync-config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
