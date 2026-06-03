@@ -224,6 +224,19 @@ body {
   line-height: 1.3;
 }
 
+.exercise-link {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.exercise-link:active {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
 .exercise-card.primary .exercise-name::before {
   content: "★ ";
   color: var(--primary-badge);

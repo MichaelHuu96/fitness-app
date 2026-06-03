@@ -59,6 +59,11 @@ function weightKey(dayId, exerciseId) {
   return `${dayId}:${exerciseId}`;
 }
 
+function googleSearchUrl(exerciseName) {
+  const query = encodeURIComponent(`${exerciseName} exercise form`);
+  return `https://www.google.com/search?q=${query}`;
+}
+
 function renderDay(dayIndex) {
   const day = plan[dayIndex];
   const main = document.getElementById("workout-main");
@@ -71,7 +76,14 @@ function renderDay(dayIndex) {
 
       return `
         <li class="exercise-card${primaryClass}">
-          <h2 class="exercise-name">${escapeHtml(ex.name)}</h2>
+          <h2 class="exercise-name">
+            <a
+              class="exercise-link"
+              href="${googleSearchUrl(ex.name)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >${escapeHtml(ex.name)}</a>
+          </h2>
           <div class="exercise-meta">
             <span>Sets: <strong>${escapeHtml(ex.sets)}</strong></span>
             <span>Reps: <strong>${escapeHtml(ex.reps)}</strong></span>
