@@ -1,0 +1,10 @@
+{
+  "name": "Workout Tracker",
+  "short_name": "Workout",
+  "description": "3-day workout plan with weight tracking",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f1419",
+  "theme_color": "#0f1419",
+  "orientation": "portrait"
+}
