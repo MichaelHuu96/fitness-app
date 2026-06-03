@@ -13,35 +13,35 @@
 <body>
   <header class="header">
     <h1>Workout Tracker</h1>
-    <p class="subtitle" id="sync-status">3-day split</p>
+    <p class="subtitle" id="sync-status">Loading…</p>
   </header>
 
   <section class="sync-panel" aria-label="Sync settings">
     <button type="button" class="sync-toggle" id="sync-toggle" aria-expanded="false">
-      Sync across devices
+      Sync setup (one time)
       <span class="sync-chevron" aria-hidden="true">▼</span>
     </button>
     <div class="sync-body" id="sync-body" hidden>
       <p class="sync-hint">
-        Use the same sync code on every phone or browser. Cloud sync needs a free Firebase setup (see README).
+        Paste a GitHub token once on each phone. Weights auto-save to your repo and load on every device — no export/import.
       </p>
-      <label class="sync-label" for="sync-code">Sync code</label>
-      <div class="sync-code-row">
-        <input
-          type="text"
-          id="sync-code"
-          class="sync-code-input"
-          placeholder="e.g. my-workout-2024"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button type="button" id="generate-sync-code" class="btn-icon" title="Generate random code">🎲</button>
-      </div>
+      <label class="sync-label" for="github-token">GitHub token</label>
+      <input
+        type="password"
+        id="github-token"
+        class="sync-code-input"
+        placeholder="ghp_… or github_pat_…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <p class="sync-hint">
+        <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">Create a fine-grained token</a>
+        → this repo only → Contents: Read and write.
+      </p>
       <p class="sync-message" id="sync-message" role="status"></p>
       <div class="sync-actions">
-        <button type="button" id="pull-cloud" class="btn-secondary">Pull from cloud</button>
-        <button type="button" id="export-weights" class="btn-secondary">Export</button>
-        <button type="button" id="import-weights" class="btn-secondary">Import</button>
+        <button type="button" id="save-token" class="btn-secondary">Save token</button>
+        <button type="button" id="pull-now" class="btn-secondary">Refresh now</button>
       </div>
     </div>
   </section>
@@ -59,8 +59,6 @@
   </footer>
 
   <script src="sync-config.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,2 +1,8 @@
-// Cloud sync disabled until you copy sync-config.example.js and add Firebase credentials.
-window.SYNC_CONFIG = { enabled: false };
+window.SYNC_CONFIG = {
+  github: {
+    owner: "MichaelHuu96",
+    repo: "fitness-app",
+    branch: "main",
+    path: "data/weights.json",
+  },
+};
