@@ -1,9 +1,0 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Only sync IDs of 8–64 alphanumeric chars (treat your sync code like a password).
-    match /weights/{syncId} {
-      allow read, write: if syncId.matches('^[a-zA-Z0-9_-]{8,64}$');
-    }
-  }
-}
